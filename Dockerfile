@@ -13,5 +13,6 @@ WORKDIR /core/cerbero
 RUN git config --global user.name "foobar"
 RUN git config --global user.email "foo@bar.com"
 RUN ./cerbero-uninstalled -c config/linux.cbc bootstrap
+RUN ./cerbero-uninstalled -c config/linux.cbc wipe --force
 RUN ./cerbero-uninstalled -c config/linux.cbc package -f openwebrtc
 RUN dpkg -i /core/cerbero/*.deb
