@@ -39,7 +39,7 @@ class UnixBootstrapper (BootstrapperBase):
 
 class DebianBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo apt-get install %s'
+    tool = 'apt-get -qqy install %s'
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
                 'autopoint', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
@@ -107,13 +107,10 @@ class RedHatBootstrapper (UnixBootstrapper):
         if self.config.target_platform == Platform.LINUX:
             self.packages.append('chrpath')
             self.packages.append('fuse-devel')
-        # Use sudo to gain root access on everything except RHEL
-        if self.config.distro_version != DistroVersion.REDHAT_6:
-            self.tool = 'sudo ' + self.tool
 
 class OpenSuseBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo zypper install %s'
+    tool = 'zypper install %s'
     packages = ['gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool',
             'gettext-tools', 'make', 'cmake', 'bison', 'flex', 'yasm',
             'gtk-doc', 'curl', 'doxygen', 'texinfo',
@@ -128,7 +125,7 @@ class OpenSuseBootstrapper (UnixBootstrapper):
 
 class ArchBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo pacman -S %s --needed'
+    tool = 'pacman -S %s --needed'
     packages = ['intltool', 'cmake', 'doxygen', 'gtk-doc',
             'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make',
             'curl', 'gettext', 'alsa-lib', 'yasm', 'gperf',
