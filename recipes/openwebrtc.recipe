@@ -73,6 +73,7 @@ class Recipe(recipe.Recipe):
     }
 
     def prepare(self):
+        self.configure_options += ' --enable-owr-gst '
         if self.config.variants.owr_bridge:
             self.deps += ['seed']
             self.files_libs += ['libopenwebrtc_bridge']
