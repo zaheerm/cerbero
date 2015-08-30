@@ -18,3 +18,9 @@ ways to meet our needs.
 
 We like collaboration and hope the use of cerbero to build OpenWebRTC will be
 mutually beneficial. *All real cerbero changes are being submitted upstream!*
+
+## Building in docker
+
+Once you have docker installed, do a: docker build .
+
+Currently the windows build fails on gst-plugins-bad ext/dtls due to X509_NAME being declared by mingw as well as openssl.
