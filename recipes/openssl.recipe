@@ -72,14 +72,14 @@ class Recipe(recipe.Recipe):
             # We don't do this in Configure because that messes with CC/LD/AR etc.
             if self.config.target_arch == Architecture.X86:
                 self.openssl_platform = 'mingw'
-                self.make += ' CROSS_COMPILE=i686-w64-mingw32-'
+#                self.make += ' CROSS_COMPILE=i686-w64-mingw32-'
             elif self.config.target_arch == Architecture.X86_64:
                 self.target_host_prefix = 'x86_64-w64-mingw32-'
                 self.openssl_platform = 'mingw64'
-                self.make += ' CROSS_COMPILE=x86_64-w64-mingw32-'
+#                self.make += ' CROSS_COMPILE=x86_64-w64-mingw32-'
             else:
                 raise NotImplementedError
-        # CFLAG is no typo!
+       # CFLAG is no typo!
         self.make += ' LDFLAGS+="$LDFLAGS -fPIC" CFLAG+="$CFLAGS -fPIC -DOPENSSL_PIC"'
         self.make_install = 'make install_sw'
 
@@ -92,13 +92,33 @@ class Recipe(recipe.Recipe):
     @modify_environment
     def configure(self):
         # OpenSSL guesses the libdir incorrectly on x86_64
-        config_sh = 'sh ./Configure --prefix=' + self.config.prefix + \
+        config_sh = 'sh -x ./Configure --prefix=' + self.config.prefix + \
             ' --libdir=lib' + self.config.lib_suffix
         if self.config.target_platform == Platform.IOS:
             config_sh += ' no-shared no-dso '
         else:
             config_sh += ' shared '
-        shell.call(config_sh + self.openssl_platform, self.build_dir)
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.target_arch == Architecture.X86:
+                host_arch = 'i686'
+            elif self.config.target_arch == Architecture.X86_64:
+                host_arch = 'x86_64'
+            else:
+                raise NotImplementedError
+            shell.call("sed -i 's/:.dll.a/ -Wl,--export-all -shared:.dll.a/g' Configure", self.build_dir)
+            shell.call("sed -i 's,.*target already defined.*,$target=$_;,g' Configure", self.build_dir)
+#            shell.call("sed -i '/#define HEADER_X509V3_H/a \\n#ifdef X509_NAME\n#undef X509_NAME\n#endif' include/openssl/x509v3.h", self.build_dir)
+            config_sh += ' --cross-compile-prefix=%s-w64-mingw32- ' % (host_arch,)
+            print('sh -x ./Configure mingw64 shared --cross-compile-prefix=x86_64-w64-mingw32- --prefix=' + self.config.prefix)
+            shell.call('sh -x ./Configure mingw64 shared --cross-compile-prefix=x86_64-w64-mingw32- --prefix=' + self.config.prefix, self.build_dir)
+        else:
+            shell.call(config_sh + self.openssl_platform, self.build_dir)
+
+    @modify_environment
+    def compile(self):
+        shell.call("sed -i 's/CC= \$(CROSS_COMPILE)x.*gcc/CC= \$(CROSS_COMPILE)gcc/g' Makefile", self.build_dir)
+        shell.call('make', self.build_dir)
+        shell.call('make install', self.build_dir)
 
     def post_install(self):
         # XXX: Don't forget to update this when the soname is bumped!
