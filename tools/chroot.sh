@@ -85,7 +85,7 @@ mkdir -p $CHROOT_PATH/home/$USER/.cerbero
 cp -f tools/cerbero.cbc.template $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
 echo "distro = \"$cerbero_distro\"" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
 echo "distro_version = \"$cerbero_distro_version\"" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
-sudo mkdir -p $CHROOT_PATH/opt/gstreamer-1.0
+mkdir -p $CHROOT_PATH/opt/gstreamer-1.0
 
 echo "fixing permissions"
 chown -R $USER:$USER $CHROOT_PATH/home/$USER
