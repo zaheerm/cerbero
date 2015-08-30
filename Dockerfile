@@ -3,7 +3,7 @@ MAINTAINER Zaheer Merali <zaheermerali@gmail.com>
 RUN mkdir /core
 RUN apt-get -qq update && apt-get -qqy install build-essential autoconf automake libglib2.0-dev libtool python3-pip
 RUN apt-get -qq update && apt-get -qqy install git
-
+RUN dpkg --add-architecture i386 && apt-get -qq update
 RUN mkdir -p /opt/openwebrtc-0.3
 ADD . /core/cerbero
 WORKDIR /core/cerbero
