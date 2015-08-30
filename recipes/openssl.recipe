@@ -71,6 +71,7 @@ class Recipe(recipe.Recipe):
             # Set CROSS_COMPILE so that the correct `windres` is invoked.
             # We don't do this in Configure because that messes with CC/LD/AR etc.
             if self.config.target_arch == Architecture.X86:
+                self.target_host_prefix = 'i686-w64-mingw32-'
                 self.openssl_platform = 'mingw'
             elif self.config.target_arch == Architecture.X86_64:
                 self.target_host_prefix = 'x86_64-w64-mingw32-'
@@ -97,17 +98,11 @@ class Recipe(recipe.Recipe):
         else:
             config_sh += ' shared '
         if self.config.target_platform == Platform.WINDOWS:
-            if self.config.target_arch == Architecture.X86:
-                host_arch = 'i686'
-            elif self.config.target_arch == Architecture.X86_64:
-                host_arch = 'x86_64'
-            else:
-                raise NotImplementedError
             shell.call("sed -i 's/:.dll.a/ -Wl,--export-all -shared:.dll.a/g' Configure", self.build_dir)
             shell.call("sed -i 's,.*target already defined.*,$target=$_;,g' Configure", self.build_dir)
             shell.call("sed -i '/#define HEADER_X509V3_H/a \\n#ifdef X509_NAME\n#undef X509_NAME\n#endif' include/openssl/x509v3.h", self.build_dir)
-            config_sh += ' --cross-compile-prefix=%s-w64-mingw32- ' % (host_arch,)
-            shell.call('sh ./Configure mingw64 shared --cross-compile-prefix=x86_64-w64-mingw32- --prefix=' + self.config.prefix, self.build_dir)
+            shell.call('sh ./Configure ' + self.openssl_platform + ' shared --cross-compile-prefix=' +
+		self.target_host_prefix + ' --prefix=' + self.config.prefix, self.build_dir)
         else:
             shell.call(config_sh + self.openssl_platform, self.build_dir)
 
